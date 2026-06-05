@@ -1,0 +1,63 @@
+HELP.md
+# Maven + Spring Boot
+target/
+**/target/
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+pom.xml.tag
+pom.xml.releaseBakup
+pom.xml.versionsBackup
+pom.xml.next
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+.out
+.idea_modules
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/
+
+
+# Logs
+*.log
+logs/
+lombok.log
+
+# Docker
+.dockerignore
+
+# Karate DSL
+karate-reports/
+karate-results/
+target/surefire-reports/
+*/karate/*html
+*/karate/*json
+*/karate/*xml
+
+#Environment
+.env
+.env.*
