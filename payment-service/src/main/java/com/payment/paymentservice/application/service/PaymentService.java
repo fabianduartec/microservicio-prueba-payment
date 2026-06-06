@@ -3,6 +3,7 @@ package com.payment.paymentservice.application.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.payment.paymentservice.application.validation.PaymentValidationChain;
 import com.payment.paymentservice.cliente.fraude.FraudRisk;
+import com.payment.paymentservice.domain.common.AntifraudProviderException;
 import com.payment.paymentservice.domain.common.EstadoAuthorization;
 import com.payment.paymentservice.domain.common.PaymentNotFoundException;
 import com.payment.paymentservice.domain.dto.PaymentAuthorizationRequestDto;
@@ -41,18 +42,24 @@ public class PaymentService {
 
         log.info("Aplicando validación de campos");
         validationChain.validate(request);
-        FraudRisk risk = cachedFraudService.validate(request.transactionId(), request.customerId(), request.amount(), request.currency());
-        log.info("Respuesta obtenida desde caché transactionId={}", request.transactionId());
+
         PaymentAuthorization authorization = new PaymentAuthorization();
         authorization.setTransactionId(request.transactionId());
-
-        if (risk == FraudRisk.LOW_RISK) {
-            authorization.setStatus(EstadoAuthorization.APPROVED);
-            authorization.setAuthorizationCode("AUTH-" + UUID.randomUUID().toString().substring(0, 6));
-            authorization.setMessage("Payment authorized");
-        } else {
+        try {
+            FraudRisk risk = cachedFraudService.validate(request.transactionId(), request.customerId(), request.amount(), request.currency());
+            log.info("Respuesta obtenida desde caché transactionId={}", request.transactionId());
+            if (risk == FraudRisk.LOW_RISK) {
+                authorization.setStatus(EstadoAuthorization.APPROVED);
+                authorization.setAuthorizationCode("AUTH-" + UUID.randomUUID().toString().substring(0, 6));
+                authorization.setMessage("Payment authorized");
+            } else {
+                authorization.setStatus(EstadoAuthorization.REJECTED);
+                authorization.setMessage("Payment rejected by business rules");
+            }
+        } catch (AntifraudProviderException ex) {
             authorization.setStatus(EstadoAuthorization.REJECTED);
-            authorization.setMessage("Payment rejected by business rules");
+            authorization.setAuthorizationCode(null);
+            authorization.setMessage("Proveedor antifraude no disponilbe");
         }
 
         try {

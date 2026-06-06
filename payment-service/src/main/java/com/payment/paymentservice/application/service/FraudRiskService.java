@@ -3,6 +3,7 @@ package com.payment.paymentservice.application.service;
 import com.payment.paymentservice.cliente.fraude.FraudRisk;
 import com.payment.paymentservice.cliente.fraude.FraudRiskResponse;
 import com.payment.paymentservice.cliente.fraude.IFraudProviderClient;
+import com.payment.paymentservice.domain.common.AntifraudProviderException;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.timelimiter.annotation.TimeLimiter;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +29,8 @@ public class FraudRiskService {
 
     public CompletableFuture<FraudRiskResponse> fallbackRisk(String transactionId, String customerId, BigDecimal amount, String currency, Throwable ex) {
         log.warn("Fallback activado transactionId={} motivo={}", transactionId, ex.getMessage());
-        return CompletableFuture.completedFuture(new FraudRiskResponse(FraudRisk.HIGH_RISK, "Fallback: proveedor no disponible")
-        );
+        CompletableFuture<FraudRiskResponse> future = new CompletableFuture<>();
+        future.completeExceptionally(new AntifraudProviderException());
+        return future;
     }
 }

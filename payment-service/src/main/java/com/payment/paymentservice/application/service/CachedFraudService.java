@@ -26,7 +26,7 @@ public class CachedFraudService {
             throw ex;
         }catch (Exception ex) {
             log.warn("Error consultando antifraude transactionId={} motivo={}", transactionId, ex.getMessage());
-            return FraudRisk.HIGH_RISK;
+            throw new AntifraudProviderException();
         }
     }
 }
