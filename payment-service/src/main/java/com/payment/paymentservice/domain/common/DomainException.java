@@ -1,0 +1,13 @@
+package com.payment.paymentservice.domain.common;
+
+import lombok.Getter;
+
+@Getter
+public class DomainException extends RuntimeException{
+    private final String codigo;
+
+    public DomainException(String codigo, String mensaje) {
+        super(mensaje);
+        this.codigo = codigo;
+    }
+}

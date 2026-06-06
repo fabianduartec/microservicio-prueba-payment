@@ -1,0 +1,43 @@
+services:
+  redis:
+    image: redis:8.2-alpine
+    container_name: payment-redis
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+    networks:
+      - payment-network
+    restart: unless-stopped
+  payment-service:
+    build: ./payment-service
+    container_name: payment-authorization-service
+    ports:
+      - "8080:8080"
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PORT=6379
+      - SPRING_CACHE_TYPE=redis
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - payment-network
+    restart: unless-stopped
+networks:
+  payment-network:
+    driver: bridge
+volumes:
+  redis_data:
